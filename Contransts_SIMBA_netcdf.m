@@ -42,7 +42,7 @@ useMedianMidQC = true;
 bottomHeatingThreshold = 0.1;
 
 geoCfg = struct();
-geoCfg.maxSpeed_km_per_hr = 3;
+geoCfg.maxSpeed_km_per_hr = 2;
 geoCfg.maxInterpGap_hours = 24;
 geoCfg.minValidLatitude = -90;
 geoCfg.maxValidLatitude = 90;
@@ -352,7 +352,7 @@ t.TimeZone = 'UTC';
 lat = double(lat(:));
 lon = double(lon(:));
 end
-
+%%
 function [tOut, latRawOut, lonRawOut, dataOut, latCorrOut, lonCorrOut, geoFlag] = ...
     cleanTemperatureGeoKeepRaw(tIn, latIn, lonIn, dataIn, geoCfg)
 
@@ -372,31 +372,73 @@ if isempty(tOut.TimeZone)
     tOut.TimeZone = 'UTC';
 end
 
+% -------------------------------------------------------------------------
+% 1) Drop invalid time rows
+% -------------------------------------------------------------------------
 goodTime = ~isnat(tOut);
 tOut = tOut(goodTime);
 latRawOut = latRawOut(goodTime);
 lonRawOut = lonRawOut(goodTime);
 dataOut = dataOut(goodTime,:);
 
-[tOut, order] = sort(tOut);
-latRawOut = latRawOut(order);
-lonRawOut = lonRawOut(order);
-dataOut = dataOut(order,:);
+if isempty(tOut)
+    latCorrOut = [];
+    lonCorrOut = [];
+    geoFlag = zeros(0,1,'int8');
+    return
+end
 
-[tOut, ia] = unique(tOut, 'stable');
-latRawOut = latRawOut(ia);
-lonRawOut = lonRawOut(ia);
-dataOut = dataOut(ia,:);
+% -------------------------------------------------------------------------
+% 2) Sort by time
+% -------------------------------------------------------------------------
+[tOut, isrt] = sort(tOut);
+latRawOut = latRawOut(isrt);
+lonRawOut = lonRawOut(isrt);
+dataOut = dataOut(isrt,:);
 
-latRawOut = latRawOut(:);
-lonRawOut = lonRawOut(:);
+% -------------------------------------------------------------------------
+% 3) Merge duplicate times by keeping the median position
+% -------------------------------------------------------------------------
+[xu, ~, iu] = unique(posixtime(tOut), 'stable');
+nU = numel(xu);
+
+tKeep = NaT(nU,1,'TimeZone','UTC');
+latKeep = nan(nU,1);
+lonKeep = nan(nU,1);
+rowKeep = nan(nU,1);
+
+for k = 1:nU
+    idx = find(iu == k);
+    tKeep(k) = tOut(idx(1));
+
+    latBlock = latRawOut(idx);
+    lonBlock = wrapTo180Local(lonRawOut(idx));
+
+    latKeep(k) = median(latBlock, 'omitnan');
+
+    lonRad = deg2rad(lonBlock);
+    lonKeep(k) = wrapTo180Local(rad2deg(angle(mean(exp(1i * lonRad), 'omitnan'))));
+
+    rowKeep(k) = idx(1);
+end
+
+tOut = tKeep;
+latRawOut = latKeep;
+lonRawOut = lonKeep;
+dataOut = dataOut(rowKeep,:);
+
+% Keep raw longitude consistent for export/plotting
+lonRawOut = wrapTo180Local(lonRawOut);
 
 latCorrOut = latRawOut;
-lonCorrOut = mod(lonRawOut + 180, 360) - 180;
+lonCorrOut = lonRawOut;
 
 n = numel(tOut);
-geoFlag = ones(n,1,'int8');
+geoFlag = ones(n,1,'int8');  % 1 = observed QC-passed, 2 = interpolated, 3 = invalid/removed
 
+% -------------------------------------------------------------------------
+% 4) Hard validity screening
+% -------------------------------------------------------------------------
 validGeo = isfinite(latCorrOut) & isfinite(lonCorrOut) & ...
            latCorrOut >= geoCfg.minValidLatitude & latCorrOut <= geoCfg.maxValidLatitude & ...
            lonCorrOut >= geoCfg.minValidLongitude & lonCorrOut <= geoCfg.maxValidLongitude;
@@ -405,6 +447,41 @@ latCorrOut(~validGeo) = NaN;
 lonCorrOut(~validGeo) = NaN;
 geoFlag(~validGeo) = int8(3);
 
+% -------------------------------------------------------------------------
+% 5) Point-to-point speed filter
+% Remove points involved in implausible motion
+% -------------------------------------------------------------------------
+good = isfinite(latCorrOut) & isfinite(lonCorrOut);
+
+if nnz(good) >= 2
+    idx = find(good);
+
+    for j = 2:numel(idx)
+        i1 = idx(j-1);
+        i2 = idx(j);
+
+        dtHr = hours(tOut(i2) - tOut(i1));
+        if dtHr <= 0
+            latCorrOut(i2) = NaN;
+            lonCorrOut(i2) = NaN;
+            geoFlag(i2) = int8(3);
+            continue
+        end
+
+        dKm = gcDistanceKm(latCorrOut(i1), lonCorrOut(i1), latCorrOut(i2), lonCorrOut(i2));
+        v = dKm / dtHr;
+
+        if v > geoCfg.maxSpeed_km_per_hr
+            latCorrOut(i2) = NaN;
+            lonCorrOut(i2) = NaN;
+            geoFlag(i2) = int8(3);
+        end
+    end
+end
+
+% -------------------------------------------------------------------------
+% 6) Isolated 3-point spike filter
+% -------------------------------------------------------------------------
 for k = 2:n-1
     if ~isfinite(latCorrOut(k-1)) || ~isfinite(lonCorrOut(k-1)) || ...
        ~isfinite(latCorrOut(k))   || ~isfinite(lonCorrOut(k))   || ...
@@ -422,8 +499,8 @@ for k = 2:n-1
         continue
     end
 
-    d1 = gcDistanceKm(latCorrOut(k-1), lonCorrOut(k-1), latCorrOut(k), lonCorrOut(k));
-    d2 = gcDistanceKm(latCorrOut(k), lonCorrOut(k), latCorrOut(k+1), lonCorrOut(k+1));
+    d1 = gcDistanceKm(latCorrOut(k-1), lonCorrOut(k-1), latCorrOut(k),   lonCorrOut(k));
+    d2 = gcDistanceKm(latCorrOut(k),   lonCorrOut(k),   latCorrOut(k+1), lonCorrOut(k+1));
     d13 = gcDistanceKm(latCorrOut(k-1), lonCorrOut(k-1), latCorrOut(k+1), lonCorrOut(k+1));
 
     v1 = d1 / dt1;
@@ -439,6 +516,42 @@ for k = 2:n-1
     end
 end
 
+% -------------------------------------------------------------------------
+% 7) Moving-median deviation filter
+% Removes local GPS wander/jitter that survives speed QC
+% -------------------------------------------------------------------------
+good = isfinite(latCorrOut) & isfinite(lonCorrOut);
+
+if nnz(good) >= 5
+    latMed = latCorrOut;
+    lonMed = lonCorrOut;
+
+    latMed(good) = movmedian(latCorrOut(good), 5, 'omitnan');
+
+    lonUnw = rad2deg(unwrap(deg2rad(lonCorrOut(good))));
+    lonMedUnw = movmedian(lonUnw, 5, 'omitnan');
+    lonMed(good) = wrapTo180Local(lonMedUnw);
+
+    devKm = nan(n,1);
+    gidx = find(good);
+
+    for j = 1:numel(gidx)
+        k = gidx(j);
+        devKm(k) = gcDistanceKm(latCorrOut(k), lonCorrOut(k), latMed(k), lonMed(k));
+    end
+
+    % Tune this threshold if needed
+    maxDevKm = 1.5;
+
+    badDev = devKm > maxDevKm;
+    latCorrOut(badDev) = NaN;
+    lonCorrOut(badDev) = NaN;
+    geoFlag(badDev) = int8(3);
+end
+
+% -------------------------------------------------------------------------
+% 8) Interpolate only short gaps
+% -------------------------------------------------------------------------
 good = isfinite(latCorrOut) & isfinite(lonCorrOut);
 
 if nnz(good) >= 2 && geoCfg.maxInterpGap_hours > 0
@@ -447,25 +560,33 @@ if nnz(good) >= 2 && geoCfg.maxInterpGap_hours > 0
 
     latInterp = interp1(xGood, latCorrOut(good), xAll, 'linear', NaN);
 
-    lonUnwrapped = rad2deg(unwrap(deg2rad(lonCorrOut(good))));
-    lonInterp = interp1(xGood, lonUnwrapped, xAll, 'linear', NaN);
+    lonUnw = rad2deg(unwrap(deg2rad(lonCorrOut(good))));
+    lonInterpUnw = interp1(xGood, lonUnw, xAll, 'linear', NaN);
+    lonInterp = wrapTo180Local(lonInterpUnw);
+
+    gidx = find(good);
 
     prevGood = nan(n,1);
     nextGood = nan(n,1);
 
-    gidx = find(good);
-
-    for j = 1:numel(gidx)
-        prevGood(gidx(j):end) = gidx(j);
+    last = NaN;
+    for k = 1:n
+        if ismember(k, gidx)
+            last = k;
+        end
+        prevGood(k) = last;
     end
 
-    for j = numel(gidx):-1:1
-        nextGood(1:gidx(j)) = gidx(j);
+    last = NaN;
+    for k = n:-1:1
+        if ismember(k, gidx)
+            last = k;
+        end
+        nextGood(k) = last;
     end
 
     for k = 1:n
         if good(k)
-            geoFlag(k) = int8(1);
             continue
         end
 
@@ -474,6 +595,7 @@ if nnz(good) >= 2 && geoCfg.maxInterpGap_hours > 0
 
         if isfinite(ip) && isfinite(in) && ip ~= in
             gapHours = hours(tOut(in) - tOut(ip));
+
             if gapHours <= geoCfg.maxInterpGap_hours
                 latCorrOut(k) = latInterp(k);
                 lonCorrOut(k) = lonInterp(k);
@@ -483,7 +605,28 @@ if nnz(good) >= 2 && geoCfg.maxInterpGap_hours > 0
     end
 end
 
-lonCorrOut = mod(lonCorrOut + 180, 360) - 180;
+% -------------------------------------------------------------------------
+% 9) Optional light smoothing on final accepted/interpolated track
+% Only smooth finite points, keep gaps as NaN
+% -------------------------------------------------------------------------
+good = isfinite(latCorrOut) & isfinite(lonCorrOut);
+
+if nnz(good) >= 3
+    latSmooth = latCorrOut;
+    lonSmooth = lonCorrOut;
+
+    latSmooth(good) = movmean(latCorrOut(good), 3, 'omitnan');
+
+    lonUnw = rad2deg(unwrap(deg2rad(lonCorrOut(good))));
+    lonSmoothUnw = movmean(lonUnw, 3, 'omitnan');
+    lonSmooth(good) = wrapTo180Local(lonSmoothUnw);
+
+    latCorrOut = latSmooth;
+    lonCorrOut = lonSmooth;
+end
+
+lonCorrOut = wrapTo180Local(lonCorrOut);
+
 end
 
 function dkm = gcDistanceKm(lat1, lon1, lat2, lon2)
@@ -500,6 +643,10 @@ dlon = lon2 - lon1;
 a = sin(dlat./2).^2 + cos(lat1).*cos(lat2).*sin(dlon./2).^2;
 c = 2 .* atan2(sqrt(a), sqrt(max(0, 1-a)));
 dkm = R .* c;
+end
+
+function lon = wrapTo180Local(lon)
+lon = mod(lon + 180, 360) - 180;
 end
 
 function [t, latRaw, lonRaw, data, latCorr, lonCorr, geoFlag] = ...
