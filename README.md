@@ -12,3 +12,10 @@ Positions of the air-snow, snow-ice, and ice-water interfaces were derived from 
 Acknowledgements
 
 The data collection is part of the expedition of the Research Vessel Polarstern (Knust, 2017, doi:10.17815/jlsrf-3-163) during the expedition CONTRASTS (PS149, grant: AWI_PS149_00). ES was supported through the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 101003472 - Arctic PASSION. DD's participation in the CONTRASTs cruise was supported by internal funding from the Norwegian Polar Institute.
+
+<figure>
+  <img src="https://github.com/esalganik/Contrasts-ice-coring/blob/main/Density_salinity_temperature_vs_time.png" width="600">
+  <figcaption>
+    <b>Figure 1.</b> Sea ice salinity, density, and temperature temporal evolution during the CONTRASTS expedition.
+  </figcaption>
+</figure>
