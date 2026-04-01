@@ -14,7 +14,7 @@ Acknowledgements
 The data collection is part of the expedition of the Research Vessel Polarstern (Knust, 2017, doi:10.17815/jlsrf-3-163) during the expedition CONTRASTS (PS149, grant: AWI_PS149_00). ES was supported through the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 101003472 - Arctic PASSION. DD's participation in the CONTRASTs cruise was supported by internal funding from the Norwegian Polar Institute.
 
 <figure>
-  <img src="https://github.com/esalganik/Contrasts-SIMBA/blob/main/Export/SIMBA_temperature_summary.png" width="600">
+  <img src="https://github.com/esalganik/Contrasts-SIMBA/blob/main/Export/SIMBA_temperature_summary.png" width="1000">
   <figcaption>
     <b>Figure 1.</b> Sea ice temperature and identified interfaces from SIMBA buoys deployed during the CONTRASTS expedition.
   </figcaption>
