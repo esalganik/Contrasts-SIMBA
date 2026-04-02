@@ -15,20 +15,12 @@ SIMBA buoy data were obtained from the Meereisportal database (https://data.meer
 
 Variables
 
-Time & depth:
-time_temperature, time_heating030, time_heating120, time_manual (opt.), depth (m, positive downward)
-Geolocation:
-latitude_temperature_raw, longitude_temperature_raw (raw)
-latitude_temperature, longitude_temperature (QC)
-geolocation_flag_temperature (1=original, 2=interpolated, 3=invalid, 4=edge-filled)
-Measurements:
-temperature (°C), temperature_change_30s, temperature_change_120s (°C)
-Interfaces (m below water level)
-air_snow_interface_*, snow_ice_interface_*, ice_water_interface_*
-Derived:
-snow_thickness_*, ice_thickness_*
-Manual:
-manual_air_snow_interface_depth, manual_ice_water_interface_depth
+Time & depth: time_temperature, time_heating030, time_heating120, time_manual (opt.), depth (m, positive downward).
+Geolocation: latitude_temperature_raw, longitude_temperature_raw (raw), latitude_temperature, longitude_temperature (QC), geolocation_flag_temperature (1=original, 2=interpolated, 3=invalid, 4=edge-filled).
+Measurements: temperature (°C), temperature_change_30s, temperature_change_120s (°C).
+Interfaces (m below water level): air_snow_interface, snow_ice_interface, ice_water_interface.
+Derived: snow_thickness, ice_thickness.
+Manual: manual_air_snow_interface_depth, manual_ice_water_interface_depth.
 
 Acknowledgements
 
