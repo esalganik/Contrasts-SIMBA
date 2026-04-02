@@ -282,6 +282,34 @@ exportgraphics(gcf, outPng2, 'Resolution', 300);
 
 fprintf('Saved lon/lat evolution to: %s\n', outPng2);
 
+%% Corrected geolocation bounds
+allLatCorr = [];
+allLonCorr = [];
+
+for k = 1:numel(buoys)
+    allLatCorr = [allLatCorr; buoys(k).lat_corr(:)];
+    allLonCorr = [allLonCorr; buoys(k).lon_corr(:)];
+end
+
+good = isfinite(allLatCorr) & isfinite(allLonCorr);
+allLatCorr = allLatCorr(good);
+allLonCorr = allLonCorr(good);
+
+if isempty(allLatCorr)
+    warning('No valid corrected geolocation found.')
+else
+    latMin = min(allLatCorr);
+    latMax = max(allLatCorr);
+    lonMin = min(allLonCorr);
+    lonMax = max(allLonCorr);
+
+    fprintf('\nCorrected geolocation bounds:\n');
+    fprintf('  South = %.4f\n', latMin);
+    fprintf('  North = %.4f\n', latMax);
+    fprintf('  West  = %.4f\n', lonMin);
+    fprintf('  East  = %.4f\n', lonMax);
+end
+
 %% Helper
 function tf = hasVariable(ncFile, varName)
 info = ncinfo(ncFile);
