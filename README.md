@@ -13,7 +13,7 @@ The dataset includes the following variables: time and depth coordinates; raw an
 
 Buoys 2025T143, 2025T144, and 2025T145 were deployed on small ridges on ice floes with regimes 1, 2, and 3, respectively, while buoys 2025T135 and 2025T136 were deployed on level ice on ice floes with regimes 2 and 3. The initial ice thickness at the deployment sites was 2.85 m, 3.40 m, 3.23 m, 1.97 m, and 2.09 m, respectively. The locations of the buoy sites, overlaid on optical images for each ice floe and visit, are provided in Linck Rosenhaim et al. (2026, doi:10.1594/PANGAEA.992627).
 
-SIMBA buoy data were obtained from the Meereisportal database (data.meereisportal.de/relaunch/buoy.php). Contour plot colors follow recommendations of scientifically derived color maps from Crameri et al. (2020, doi:10.1038/s41467-020-19160-7).
+SIMBA buoy data were obtained from the Meereisportal database (data.meereisportal.de/relaunch/buoy.php).
 
 Acknowledgements
 
