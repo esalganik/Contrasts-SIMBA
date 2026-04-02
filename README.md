@@ -13,6 +13,23 @@ Buoys 2025T143, 2025T144, and 2025T145 were deployed on small ridges on ice floe
 
 SIMBA buoy data were obtained from the Meereisportal database (https://data.meereisportal.de/relaunch/buoy.php).
 
+Variables
+
+Time & depth:
+time_temperature, time_heating030, time_heating120, time_manual (opt.), depth (m, positive downward)
+Geolocation:
+latitude_temperature_raw, longitude_temperature_raw (raw)
+latitude_temperature, longitude_temperature (QC)
+geolocation_flag_temperature (1=original, 2=interpolated, 3=invalid, 4=edge-filled)
+Measurements:
+temperature (°C), temperature_change_30s, temperature_change_120s (°C)
+Interfaces (m below water level)
+air_snow_interface_*, snow_ice_interface_*, ice_water_interface_*
+Derived:
+snow_thickness_*, ice_thickness_*
+Manual:
+manual_air_snow_interface_depth, manual_ice_water_interface_depth
+
 Acknowledgements
 
 The data collection is part of the expedition of the Research Vessel Polarstern (Knust, 2017, doi:10.17815/jlsrf-3-163) during the expedition CONTRASTS (PS149, grant: AWI_PS149_00). ES was supported through the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 101003472 - Arctic PASSION. DD's participation in the CONTRASTs cruise was supported by internal funding from the Norwegian Polar Institute.
