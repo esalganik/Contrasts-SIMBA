@@ -83,8 +83,8 @@ end
 allLat = allLat(isfinite(allLat));
 allLon = allLon(isfinite(allLon));
 
-latPad = 1.5;
-lonPad = 5.0;
+latPad = 0.5;
+lonPad = 2.0;
 
 latLims = [max(-90, min(allLat) - latPad), min(90, max(allLat) + latPad)];
 lonLims = [min(allLon) - lonPad, max(allLon) + lonPad];
@@ -177,7 +177,7 @@ end
 validIdx = isgraphics(hLeg);
 if any(validIdx)
     legend(hLeg(validIdx), {buoys(validIdx).id}, ...
-        'Location', 'southwest', ...
+        'Location', 'northwest', ...
         'FontSize', fs, ...
         'Box', 'on');
 end
@@ -197,14 +197,92 @@ annotation('textbox', [0.01 0.01 0.30 0.05], ...
 % -------------------------------------------------------------------------
 set(gcf, 'Units','inches','Position',[1 1 5.6 4.4]);
 
-outPng = fullfile(outDir, 'buoy_geolocation_map_clean.png');
-exportgraphics(gcf, outPng, 'Resolution', 600);
+outPng = fullfile(outDir, 'SIMBA_drift_map.png');
+exportgraphics(gcf, outPng, 'Resolution', 300);
 
 fprintf('Saved map to: %s\n', outPng);
 
+%% 
 % -------------------------------------------------------------------------
-% Helper
+% Figure: Longitude and latitude evolution
 % -------------------------------------------------------------------------
+figure('Color','w')
+tile = tiledlayout(2,1,'TileSpacing','compact','Padding','compact');
+
+% --- Longitude
+ax1 = nexttile;
+hold(ax1,'on'); box(ax1,'on'); grid(ax1,'on')
+hLeg = gobjects(numel(buoys),1);
+
+for k = 1:numel(buoys)
+    col = buoyColors(min(k,size(buoyColors,1)),:);
+    t = buoys(k).time;
+
+    goodRaw  = isfinite(t) & isfinite(buoys(k).lon_raw);
+    goodCorr = isfinite(t) & isfinite(buoys(k).lon_corr);
+
+    if any(goodRaw)
+        plot(t(goodRaw), buoys(k).lon_raw(goodRaw), '--', ...
+            'Color', rawColor, 'LineWidth', trackLineWidRaw, ...
+            'HandleVisibility','off');
+    end
+
+    if any(goodCorr)
+        hLeg(k) = plot(t(goodCorr), buoys(k).lon_corr(goodCorr), '-', ...
+            'Color', col, 'LineWidth', trackLineWidCorr, ...
+            'DisplayName', buoys(k).id);
+    end
+end
+
+ylabel('Longitude','FontSize',fs)
+title('Buoy longitude evolution','FontSize',fs+0.6)
+set(ax1,'FontSize',fs)
+ax1.XTickLabel = [];
+
+% --- Latitude
+ax2 = nexttile;
+hold(ax2,'on'); box(ax2,'on'); grid(ax2,'on')
+
+for k = 1:numel(buoys)
+    col = buoyColors(min(k,size(buoyColors,1)),:);
+    t = buoys(k).time;
+
+    goodRaw  = isfinite(t) & isfinite(buoys(k).lat_raw);
+    goodCorr = isfinite(t) & isfinite(buoys(k).lat_corr);
+
+    if any(goodRaw)
+        plot(t(goodRaw), buoys(k).lat_raw(goodRaw), '--', ...
+            'Color', rawColor, 'LineWidth', trackLineWidRaw, ...
+            'HandleVisibility','off');
+    end
+
+    if any(goodCorr)
+        plot(t(goodCorr), buoys(k).lat_corr(goodCorr), '-', ...
+            'Color', col, 'LineWidth', trackLineWidCorr, ...
+            'HandleVisibility','off');
+    end
+end
+
+ylabel('Latitude','FontSize',fs)
+xlabel('Time (UTC)','FontSize',fs)
+title('Buoy latitude evolution','FontSize',fs+0.6)
+set(ax2,'FontSize',fs)
+
+validIdx = isgraphics(hLeg);
+if any(validIdx)
+    legend(ax1, hLeg(validIdx), {buoys(validIdx).id}, ...
+        'Location','eastoutside','FontSize',fs,'Box','on');
+end
+
+linkaxes([ax1 ax2],'x');
+set(gcf,'Units','inches','Position',[1 1 6.5 4.8]);
+
+outPng2 = fullfile(outDir, 'SIMBA_lonlat_evolution.png');
+exportgraphics(gcf, outPng2, 'Resolution', 300);
+
+fprintf('Saved lon/lat evolution to: %s\n', outPng2);
+
+%% Helper
 function tf = hasVariable(ncFile, varName)
 info = ncinfo(ncFile);
 tf = any(strcmp({info.Variables.Name}, varName));

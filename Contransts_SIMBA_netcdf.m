@@ -625,6 +625,86 @@ if nnz(good) >= 3
     lonCorrOut = lonSmooth;
 end
 
+% -------------------------------------------------------------------------
+% 10) Edge completion to guarantee corrected position at all timestamps
+% Fill leading/trailing missing corrected positions by linear extrapolation
+% from the nearest valid corrected points. Do not refill internal gaps.
+% -------------------------------------------------------------------------
+goodCorr = isfinite(latCorrOut) & isfinite(lonCorrOut);
+
+if any(goodCorr)
+    iGood = find(goodCorr);
+    iFirst = iGood(1);
+    iLast  = iGood(end);
+
+    xAll = posixtime(tOut);
+
+    % --- Leading gap: extrapolate backward from first valid corrected points
+    if iFirst > 1
+        if numel(iGood) >= 2
+            j1 = iGood(1);
+            j2 = iGood(2);
+
+            if xAll(j2) ~= xAll(j1)
+                latLead = interp1(xAll([j1 j2]), latCorrOut([j1 j2]), xAll(1:j1-1), 'linear', 'extrap');
+
+                lon12 = rad2deg(unwrap(deg2rad(lonCorrOut([j1 j2]))));
+                lonLeadUnw = interp1(xAll([j1 j2]), lon12, xAll(1:j1-1), 'linear', 'extrap');
+                lonLead = wrapTo180Local(lonLeadUnw);
+            else
+                latLead = repmat(latCorrOut(j1), j1-1, 1);
+                lonLead = repmat(lonCorrOut(j1), j1-1, 1);
+            end
+        else
+            latLead = repmat(latCorrOut(iFirst), iFirst-1, 1);
+            lonLead = repmat(lonCorrOut(iFirst), iFirst-1, 1);
+        end
+
+        latCorrOut(1:iFirst-1) = latLead(:);
+        lonCorrOut(1:iFirst-1) = lonLead(:);
+        geoFlag(1:iFirst-1) = int8(4);
+    end
+
+    % --- Trailing gap: extrapolate forward from last valid corrected points
+    if iLast < n
+        if numel(iGood) >= 2
+            j1 = iGood(end-1);
+            j2 = iGood(end);
+
+            if xAll(j2) ~= xAll(j1)
+                latTail = interp1(xAll([j1 j2]), latCorrOut([j1 j2]), xAll(j2+1:end), 'linear', 'extrap');
+
+                lon12 = rad2deg(unwrap(deg2rad(lonCorrOut([j1 j2]))));
+                lonTailUnw = interp1(xAll([j1 j2]), lon12, xAll(j2+1:end), 'linear', 'extrap');
+                lonTail = wrapTo180Local(lonTailUnw);
+            else
+                latTail = repmat(latCorrOut(j2), n-j2, 1);
+                lonTail = repmat(lonCorrOut(j2), n-j2, 1);
+            end
+        else
+            latTail = repmat(latCorrOut(iLast), n-iLast, 1);
+            lonTail = repmat(lonCorrOut(iLast), n-iLast, 1);
+        end
+
+        latCorrOut(iLast+1:end) = latTail(:);
+        lonCorrOut(iLast+1:end) = lonTail(:);
+        geoFlag(iLast+1:end) = int8(4);
+    end
+
+else
+    % Fallback only if no corrected point exists at all
+    rawUsable = isfinite(latRawOut) & isfinite(lonRawOut) & ...
+                latRawOut >= geoCfg.minValidLatitude & latRawOut <= geoCfg.maxValidLatitude & ...
+                lonRawOut >= geoCfg.minValidLongitude & lonRawOut <= geoCfg.maxValidLongitude;
+
+    i0 = find(rawUsable, 1, 'first');
+    if ~isempty(i0)
+        latCorrOut(:) = latRawOut(i0);
+        lonCorrOut(:) = lonRawOut(i0);
+        geoFlag(:) = int8(4);
+    end
+end
+
 lonCorrOut = wrapTo180Local(lonCorrOut);
 
 end
@@ -932,8 +1012,8 @@ nccreate(outFile, 'geolocation_flag_temperature', ...
     'Datatype', 'int8');
 ncwrite(outFile, 'geolocation_flag_temperature', int8(geoFlagT(:)));
 ncwriteatt(outFile, 'geolocation_flag_temperature', 'long_name', 'geolocation source flag on temperature time axis');
-ncwriteatt(outFile, 'geolocation_flag_temperature', 'flag_values', int8([1 2 3]));
-ncwriteatt(outFile, 'geolocation_flag_temperature', 'flag_meanings', 'original estimated invalid');
+ncwriteatt(outFile, 'geolocation_flag_temperature', 'flag_values', int8([1 2 3 4]));
+ncwriteatt(outFile, 'geolocation_flag_temperature', 'flag_meanings', 'original interpolated invalid edge_extrapolated');
 ncwriteatt(outFile, 'geolocation_flag_temperature', 'coordinates', 'time_temperature latitude_temperature longitude_temperature');
 
 ncwriteatt(outFile, 'latitude_temperature', 'ancillary_variables', 'geolocation_flag_temperature');
