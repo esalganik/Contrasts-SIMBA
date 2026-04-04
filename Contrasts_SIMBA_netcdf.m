@@ -60,8 +60,8 @@ geoCfg.forceFullCoverage = true;
 
 ifaceCfg = struct();
 ifaceCfg.method = 'pchip_movmean';    % 'pchip_movmean', 'pchip', 'csaps', or 'linear'
-ifaceCfg.surfaceSmoothingDays = 3;    % centered moving-average window in days
-ifaceCfg.bottomSmoothingDays = 3;     % centered moving-average window in days
+ifaceCfg.surfaceSmoothingDays = 1;    % centered moving-average window in days
+ifaceCfg.bottomSmoothingDays = 1;     % centered moving-average window in days
 ifaceCfg.doExtrapolation = true;
 ifaceCfg.extrapolationMode = 'hold';  % 'hold' or 'extrap'
 ifaceCfg.enforceSurfaceMonotonic = false;
@@ -114,7 +114,7 @@ cfg(3).t_man         = [ ...
     datenum('18.08.2025','dd.mm.yyyy'), ...
     datenum('27.08.2025','dd.mm.yyyy')];
 cfg(3).t_man_format  = 'datenum';
-cfg(3).crop          = 0;
+cfg(3).crop          = 12;
 cfg(3).crop_heat     = 1;
 cfg(3).crop_heat120  = 1;
 
@@ -140,7 +140,7 @@ cfg(5).sensor        = [31 36];
 cfg(5).fb            = [0.34 0.26];
 cfg(5).hi            = [2.09 1.82];
 cfg(5).t_man         = [1 36];
-cfg(5).crop          = 5;
+cfg(5).crop          = 7;
 cfg(5).crop_heat     = 0;
 cfg(5).crop_heat120  = 0;
 
@@ -370,6 +370,7 @@ for i = 1:numel(cfg)
     fprintf('Wrote %s\n', outFile);
 end
 
+%% Helpers
 function mustExistFile(fp, labelText)
 if ~isfile(fp)
     error('Missing %s: %s', labelText, fp)
@@ -1251,8 +1252,11 @@ switch method
     case "csaps"
         yq = interpolateWithCsaps(xPick, yPick, xQuery, ifaceCfg);
 
-    otherwise
+    case "linear"
         yq = interpolateWithInterp1(xPick, yPick, xQuery, 'linear', ifaceCfg);
+
+    otherwise
+        error('Unsupported interface interpolation method: %s', ifaceCfg.method)
 end
 end
 
@@ -1325,7 +1329,11 @@ if nnz(good) < 3 || smoothDays <= 0
     return
 end
 
-dx = median(diff(xQuery(good)), 'omitnan');
+idxGood = find(good);
+xGood = xQuery(idxGood);
+yGood = ySm(idxGood);
+
+dx = median(diff(xGood), 'omitnan');
 if ~isfinite(dx) || dx <= 0
     return
 end
@@ -1335,7 +1343,21 @@ if mod(win, 2) == 0
     win = win + 1;
 end
 
-ySm = movmean(ySm, win, 'omitnan', 'Endpoints', 'shrink');
+halfWin = floor(win / 2);
+
+if numel(yGood) < win
+    return
+end
+
+yTmp = movmean(yGood, win, 'omitnan', 'Endpoints', 'shrink');
+
+yGoodSm = yGood;
+yGoodSm(halfWin+1:end-halfWin) = yTmp(halfWin+1:end-halfWin);
+
+yGoodSm(1) = yGood(1);
+yGoodSm(end) = yGood(end);
+
+ySm(idxGood) = yGoodSm;
 end
 
 function y = enforceMonotonicSeries(yIn, modeName)
