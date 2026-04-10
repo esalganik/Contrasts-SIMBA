@@ -1,5 +1,5 @@
 Snow depth and sea ice thickness from SIMBA buoys 2025T143, 2025T144, 2025T145, 2025T135, and 2025T136 during the CONTRASTS expedition
-(Evgenii Salganik, Dmitry Divine, Ran Tao, Marcel Nicolaus, 2026)
+(Evgenii Salganik, Dmitry Divine, Ran Tao, Marcel Nicolaus, Mats A Granskog, 2026)
 
 Abstract
 
@@ -17,7 +17,7 @@ SIMBA buoy data were obtained from the Meereisportal database (data.meereisporta
 
 Acknowledgements
 
-The data collection is part of the expedition of the Research Vessel Polarstern (Knust, 2017, doi:10.17815/jlsrf-3-163) during the expedition CONTRASTS (PS149, grant: AWI_PS149_00). ES was supported through the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 101003472 - Arctic PASSION. DD's participation in the CONTRASTs cruise was supported by internal funding from the Norwegian Polar Institute.
+The data collection is part of the expedition of the Research Vessel Polarstern (Knust, 2017, doi:10.17815/jlsrf-3-163) during the expedition CONTRASTS (PS149, grant: AWI_PS149_00). ES and MAG were supported through the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 101003472 - Arctic PASSION. DD's participation in the CONTRASTs cruise was supported by internal funding from the Norwegian Polar Institute. ES and RT were supported by the Helmholtz Distinguished Professorship awarded to Julienne Stroeve (W3 program for the recruitment of leading international female scientists). 
 
 <figure>
   <img src="https://github.com/esalganik/Contrasts-SIMBA/blob/main/Export/SIMBA_temperature_summary.png" width="1000">
