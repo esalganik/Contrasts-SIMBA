@@ -3,13 +3,13 @@ Snow depth and sea ice thickness from SIMBA buoys 2025T143, 2025T144, 2025T145, 
 
 Abstract
 
-This dataset provides snow depth and sea ice thickness derived from temperature and heating measurements obtained from five SIMBA (Snow and Ice Mass Balance Array; Jackson et al., 2013, doi:10.1175/JTECH-D-13-00058.1) buoys deployed on Arctic sea ice during the CONTRASTS expedition in 2025. Each buoy was equipped with a thermistor string consisting of 240 sensors with 2 cm vertical spacing, providing a 4.8 m vertical profile of temperature.
+This dataset provides snow depth and sea ice thickness derived from temperature and heating measurements obtained from five SIMBA (Snow and Ice Mass Balance Array; Jackson et al., 2013, doi:10.1175/JTECH-D-13-00058.1) buoys deployed on Arctic sea ice during the CONTRASTS expedition in 2025. Each buoy was equipped with a thermistor string consisting of 240 sensors with 2 cm vertical spacing, providing a 4.8 m vertical temperature profile.
 
 The dataset comprises observations from buoys 2025T143, 2025T144, 2025T145, 2025T135, and 2025T136, with processed data spanning 12 July to 15 November 2025. The buoy drift covered the Arctic Ocean north of Svalbard and extended into the Fram Strait region (approximately 77.7–84.8° N and 17.7° W–38.2° E) based on quality-controlled geolocation.
 
-The buoys recorded vertical temperature profiles within the snow and sea ice column, as well as temperature responses during active heating cycles (30 s and 120 s). The dataset provides time-resolved measurements on a fixed vertical grid referenced to the water level, together with associated geolocation for each timestamp.
+The buoys recorded vertical temperature profiles within the snow and sea ice column, as well as responses during active heating cycles (30 s and 120 s). The dataset provides time-resolved measurements on a fixed vertical grid referenced to the water level, together with geolocation for each timestamp.
 
-Raw GPS data contain significant errors; therefore, both raw and quality-controlled latitude and longitude are provided for each buoy. A geolocation flag indicates original, interpolated, invalid, edge-extrapolated, or long-gap-filled positions.
+Raw GPS data contain significant errors; therefore, both raw and quality-controlled latitude and longitude are provided, along with a geolocation flag indicating original, interpolated, invalid, edge-extrapolated, or long-gap-filled positions. Temperature profiles were quality-controlled to remove physically unreasonable values and sensor artefacts prior to interface detection. Profiles with extreme temperatures or inconsistent mid- and deep-column temperature ranges were excluded. Heating-cycle data were additionally filtered to remove records with insufficient bottom-sensor response. For buoy 2025T135, measurements below the identified sensor-failure level were replaced by the nearest reliable sensor value after the failure time.
 
 Derived variables include the positions of the air–snow, snow–ice, and ice–water interfaces, obtained from temperature profiles and supplemented by manual observations. The accuracy of the detected air–snow and ice–water interfaces, evaluated against manual measurements, is ±0.04 m and ±0.06 m (RMSE), respectively. Snow depth and sea ice thickness are calculated from these interfaces.
 
