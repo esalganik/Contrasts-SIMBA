@@ -1,5 +1,6 @@
 Snow depth and sea ice thickness from SIMBA buoys 2025T143, 2025T144, 2025T145, 2025T135, and 2025T136 during the CONTRASTS expedition
 (Evgenii Salganik, Dmitry Divine, Ran Tao, Marcel Nicolaus, Mats A Granskog, 2026)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20274778.svg)](https://doi.org/10.5281/zenodo.20274778)
 
 Abstract
 
