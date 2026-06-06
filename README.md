@@ -15,13 +15,10 @@ colormaps/
 data/
 ├── raw/
 └── interfaces/
-
 export_netcdf/
 export_excel/
 figures/
-
 scripts_extra/
-
 a_Contrasts_SIMBA_netcdf.m
 b_Contrasts_SIMBA_excel.m
 c_Contrasts_SIMBA_plotting.m
