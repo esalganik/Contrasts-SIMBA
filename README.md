@@ -48,13 +48,13 @@ d_Contrasts_SIMBA_map.m
 
 The processed datasets generated using this workflow are available through PANGAEA:
 
-| Buoy     | DOI                                    |
-| -------- | -------------------------------------- |
-| 2025T143 | https://doi.org/10.1594/PANGAEA.994096 |
-| 2025T144 | https://doi.org/10.1594/PANGAEA.994100 |
-| 2025T145 | https://doi.org/10.1594/PANGAEA.994105 |
-| 2025T135 | https://doi.org/10.1594/PANGAEA.994087 |
-| 2025T136 | https://doi.org/10.1594/PANGAEA.994092 |
+| Buoy | Dataset |
+|-------|----------|
+| 2025T143 | [PANGAEA.994096](https://doi.pangaea.de/10.1594/PANGAEA.994096) |
+| 2025T144 | [PANGAEA.994100](https://doi.pangaea.de/10.1594/PANGAEA.994100) |
+| 2025T145 | [PANGAEA.994105](https://doi.pangaea.de/10.1594/PANGAEA.994105) |
+| 2025T135 | [PANGAEA.994087](https://doi.pangaea.de/10.1594/PANGAEA.994087) |
+| 2025T136 | [PANGAEA.994092](https://doi.pangaea.de/10.1594/PANGAEA.994092) |
 
 ## Requirements
 
