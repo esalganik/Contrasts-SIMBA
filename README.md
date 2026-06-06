@@ -86,8 +86,8 @@ This workflow uses:
 
 ## Authors
 
-Evgenii Salganik
-Dmitry Divine
-Ran Tao
-Marcel Nicolaus
-Mats A. Granskog
+- Evgenii Salganik
+- Dmitry Divine
+- Ran Tao
+- Marcel Nicolaus
+- Mats A. Granskog
