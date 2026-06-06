@@ -1,7 +1,5 @@
 # CONTRASTS-SIMBA Processing Workflow
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20274778.svg)](https://doi.org/10.5281/zenodo.20274778)
-
 MATLAB processing workflow for deriving snow depth, sea ice thickness, temperature products, and geolocation information from SIMBA (Snow and Ice Mass Balance Array) buoys deployed during the CONTRASTS expedition in 2025.
 
 This repository contains the scripts used to generate the published PANGAEA datasets for SIMBA buoys 2025T143, 2025T144, 2025T145, 2025T135, and 2025T136.
